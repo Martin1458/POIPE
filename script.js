@@ -406,7 +406,7 @@ function startSession() {
 
   startBtn.textContent = 'Stop';
   startBtn.classList.add('running');
-  statusEl.textContent = 'Starting...';
+  statusEl.textContent = 'Running...';
   statusEl.classList.add('active');
 
   // Ease-in lava background scroll
