@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POIPE Player</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Lava lamp background -->
+  <div id="lava-bg">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+      <defs>
+        <filter id="lava" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 28 -10" result="goo"/>
+          <feComposite in="goo" in2="goo" operator="atop"/>
+        </filter>
+        <radialGradient id="blob1" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#ff9a3c"/><stop offset="100%" stop-color="#e0400a"/></radialGradient>
+        <radialGradient id="blob2" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#ffcc00"/><stop offset="100%" stop-color="#ff6600"/></radialGradient>
+        <radialGradient id="blob3" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#ff4488"/><stop offset="100%" stop-color="#cc0055"/></radialGradient>
+        <radialGradient id="blob4" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#ff7733"/><stop offset="100%" stop-color="#dd2200"/></radialGradient>
+        <radialGradient id="blob5" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#ffaa00"/><stop offset="100%" stop-color="#ee5500"/></radialGradient>
+        <radialGradient id="panelBg" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#16213e"/><stop offset="75%" stop-color="#121b35"/><stop offset="100%" stop-color="#0d0820"/></radialGradient>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0a0010"/><stop offset="100%" stop-color="#1a0030"/></linearGradient>
+      </defs>
+      <rect width="800" height="400" fill="url(#bg)"/>
+      <g id="lava-blobs" filter="url(#lava)">
+        <!-- Blobs are created and managed by JS -->
+      </g>
+    </svg>
+  </div>
+
+  <div class="container">
+    <h1>POIPE</h1>
+    <p class="subtitle">POIPE Player</p>
+
+    <!-- Buttons (always visible) -->
+    <div class="buttons">
+      <button class="btn-test" id="testBtn">Test Sound</button>
+      <button class="btn-start" id="startBtn">Start</button>
+    </div>
+
+    <p class="status" id="status"></p>
+    <p class="play-count" id="playCount"></p>
+
+    <!-- All controls — hidden during active session -->
+    <div id="controlsPanel">
+
+    <div class="columns">
+      <div class="col-left">
+        <!-- Volume -->
+        <div class="control-group">
+          <label>Volume</label>
+          <div class="slider-row">
+            <input type="range" id="volumeSlider" min="0" max="850" value="100">
+            <input type="number" id="volumeInput" min="0" value="100">
+            <span class="unit">%</span>
+          </div>
+
+          <!-- Volume Randomization (sub-control) -->
+          <div class="sub-control">
+            <label>Volume Variation</label>
+            <div class="slider-row">
+              <input type="range" id="volVarSlider" min="0" max="100" value="0">
+              <input type="number" id="volVarInput" min="0" value="0">
+              <span class="unit">±%</span>
+            </div>
+            <p class="info">Random volume range around the set volume (0 = fixed)</p>
+          </div>
+        </div>
+
+        <!-- Session Duration -->
+        <div class="control-group">
+          <label>Session Duration</label>
+          <div class="slider-row">
+            <input type="range" id="durationSlider" min="0" max="480" value="60">
+            <input type="number" id="durationInput" min="0" value="60">
+            <span class="unit">min</span>
+          </div>
+          <p class="info">How long the session runs (0 = forever)</p>
+        </div>
+      </div>
+
+      <div class="col-right">
+        <!-- Min Interval -->
+        <div class="control-group">
+          <label>Min Interval</label>
+          <div class="slider-row">
+            <input type="range" id="minIntervalSlider" min="0" max="600" value="0">
+            <input type="number" id="minIntervalInput" min="0" value="0">
+            <span class="unit">sec</span>
+          </div>
+          <p class="info">Shortest possible time between sounds</p>
+
+          <!-- Max Overlapping (sub-slider) -->
+          <div class="sub-control" id="overlapGroup" style="display: none;">
+            <label>Max Overlapping Sounds</label>
+            <div class="slider-row">
+              <input type="range" id="overlapSlider" min="1" max="10" value="3">
+              <input type="number" id="overlapInput" min="1" value="3">
+              <span class="unit">×</span>
+            </div>
+            <p class="info">How many sounds can play at the same time</p>
+          </div>
+        </div>
+
+        <!-- Max Interval -->
+        <div class="control-group">
+          <label>Max Interval</label>
+          <div class="slider-row">
+            <input type="range" id="maxIntervalSlider" min="0" max="900" value="420">
+            <input type="number" id="maxIntervalInput" min="0" value="420">
+            <span class="unit">sec</span>
+          </div>
+          <p class="info">Longest possible time between sounds</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="control-group presets-group">
+      <label>Presets</label>
+      <div class="preset-buttons">
+        <button class="btn-preset" data-preset="chill">Chill</button>
+        <button class="btn-preset" data-preset="normal">Normal</button>
+        <button class="btn-preset" data-preset="frequent">Frequent</button>
+        <button class="btn-preset" data-preset="chaos">Chaos</button>
+      </div>
+      <div id="customPresetsSection">
+        <div class="preset-custom-row">
+          <input type="text" id="presetName" placeholder="Custom preset name">
+          <button class="btn-preset-save" id="savePresetBtn">Save</button>
+        </div>
+        <div id="customPresets" class="preset-buttons"></div>
+      </div>
+      <p class="info cookie-warning" id="cookieWarning" style="display: none;">Custom presets require cookies to be enabled.</p>
+    </div>
+
+    <!-- Cookie Consent Popup -->
+    <div class="cookie-popup" id="cookiePopup">
+      <p>This site uses local storage (cookies) to save your custom presets. Allow?</p>
+      <div class="cookie-popup-buttons">
+        <button class="btn-cookie-accept" id="cookieAccept">Allow</button>
+        <button class="btn-cookie-decline" id="cookieDecline">Decline</button>
+      </div>
+    </div>
+
+    <!-- Advanced Section -->
+    <details class="advanced-section" id="advancedSection">
+      <summary>Advanced</summary>
+
+      <!-- Playback Speed -->
+      <div class="control-group">
+        <label>Playback Speed</label>
+        <div class="slider-row">
+          <input type="range" id="speedSlider" min="25" max="200" value="100">
+          <input type="number" id="speedInput" min="1" value="100">
+          <span class="unit">%</span>
+        </div>
+      </div>
+
+      <!-- Pitch Randomization -->
+      <div class="control-group">
+        <label>Pitch Variation</label>
+        <div class="slider-row">
+          <input type="range" id="pitchVarSlider" min="0" max="100" value="0">
+          <input type="number" id="pitchVarInput" min="0" max="100" value="0">
+          <span class="unit">±%</span>
+        </div>
+        <p class="info">Random pitch/speed shift per play (0 = fixed)</p>
+      </div>
+
+      <!-- Multiple Sound Files -->
+      <div class="control-group">
+        <label>Sound Files</label>
+        <p class="info" style="margin-bottom: 8px;">Default: POIPE.wav — add more to randomize</p>
+        <input type="file" id="soundFileInput" accept="audio/*" multiple>
+        <div id="soundFileList" class="sound-file-list"></div>
+      </div>
+
+      <!-- Probability Curve -->
+      <div class="control-group">
+        <label>Interval Probability Curve</label>
+        <select id="curveSelect">
+          <option value="uniform">Uniform (equal chance)</option>
+          <option value="earlyBias">Early Bias (sooner more likely)</option>
+          <option value="lateBias">Late Bias (later more likely)</option>
+          <option value="centerBias">Center Bias (middle more likely)</option>
+          <option value="edgeBias">Edge Bias (extremes more likely)</option>
+        </select>
+        <div class="slider-row" id="strengthRow">
+          <label style="min-width: 60px; margin: 0;">Strength</label>
+          <input type="range" id="strengthSlider" min="0" max="500" value="100">
+          <input type="number" id="strengthInput" min="0" value="100">
+          <span class="unit">%</span>
+        </div>
+        <p class="info" id="strengthInfo">100% = default, lower = flatter, higher = more extreme</p>
+        <canvas id="curveCanvas" width="420" height="120"></canvas>
+        <p class="info">X-axis: time (min → max interval) &nbsp;|&nbsp; Y-axis: probability</p>
+      </div>
+    </details>
+
+
+    <!-- Semi-hidden performance panel -->
+    <details class="perf-section" id="perfSection">
+      <summary>Performance</summary>
+      <div class="control-group">
+        <label>Background Blobs</label>
+        <div class="slider-row">
+          <input type="range" id="blobCountSlider" min="0" max="200" value="50">
+          <input type="number" id="blobCountInput" min="0" max="200" value="50">
+        </div>
+        <p class="info">Reduce to save memory &amp; CPU (0 = off)</p>
+      </div>
+    </details>
+
+    </div><!-- end controlsPanel -->
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

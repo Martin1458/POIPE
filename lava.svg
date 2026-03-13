@@ -1,0 +1,217 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <defs>
+    <!-- Lava lamp filter: blur + threshold = metaball merge effect -->
+    <filter id="lava" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 28 -10"
+        result="goo"/>
+      <feComposite in="goo" in2="goo" operator="atop"/>
+    </filter>
+
+    <!-- Warm lava gradient -->
+    <radialGradient id="blob1" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ff9a3c"/>
+      <stop offset="100%" stop-color="#e0400a"/>
+    </radialGradient>
+    <radialGradient id="blob2" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffcc00"/>
+      <stop offset="100%" stop-color="#ff6600"/>
+    </radialGradient>
+    <radialGradient id="blob3" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ff4488"/>
+      <stop offset="100%" stop-color="#cc0055"/>
+    </radialGradient>
+    <radialGradient id="blob4" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ff7733"/>
+      <stop offset="100%" stop-color="#dd2200"/>
+    </radialGradient>
+    <radialGradient id="blob5" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffaa00"/>
+      <stop offset="100%" stop-color="#ee5500"/>
+    </radialGradient>
+
+    <!-- Background gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a0010"/>
+      <stop offset="100%" stop-color="#1a0030"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark background -->
+  <rect width="800" height="400" fill="url(#bg)"/>
+
+  <!-- The tiling lava group — two copies stacked for seamless vertical loop -->
+  <g id="lamp-strip">
+
+    <!-- === TILE 1 (y = 0) === -->
+    <g filter="url(#lava)">
+
+      <!-- Blob A: large slow drifter -->
+      <ellipse cx="100" cy="200" rx="70" ry="60" fill="url(#blob1)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 5,-8; -3,5; 8,-10; 0,0"
+          dur="18s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="70;62;78;65;70" dur="18s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="ry" values="60;68;54;65;60" dur="18s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+      </ellipse>
+
+      <!-- Blob B -->
+      <ellipse cx="280" cy="300" rx="50" ry="45" fill="url(#blob2)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -6,-10; 4,-5; -3,-12; 0,0"
+          dur="15s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="50;58;44;54;50" dur="15s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="45;40;52;43;45" dur="15s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <!-- Blob C -->
+      <ellipse cx="180" cy="130" rx="38" ry="42" fill="url(#blob3)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 6,8; -3,12; 5,6; 0,0"
+          dur="20s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="38;44;34;42;38" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="42;36;48;40;42" dur="20s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <!-- Blob D -->
+      <ellipse cx="150" cy="250" rx="55" ry="48" fill="url(#blob4)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -5,-8; 3,-14; -7,-4; 0,0"
+          dur="22s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="55;48;62;52;55" dur="22s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="48;55;42;50;48" dur="22s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <!-- Blob E: bottom pool -->
+      <ellipse cx="230" cy="370" rx="90" ry="35" fill="url(#blob1)">
+        <animate attributeName="rx" values="90;82;96;86;90" dur="14s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="35;40;30;38;35" dur="14s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <!-- Blob F: upper right -->
+      <ellipse cx="420" cy="80" rx="45" ry="40" fill="url(#blob5)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -4,10; 6,5; -3,12; 0,0"
+          dur="17s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="45;40;50;42;45" dur="17s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="40;46;35;43;40" dur="17s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <!-- Blob G: mid-right -->
+      <ellipse cx="500" cy="260" rx="60" ry="52" fill="url(#blob2)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 5,-6; -4,8; 7,-10; 0,0"
+          dur="19s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="60;54;66;58;60" dur="19s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="52;58;46;55;52" dur="19s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <!-- Blob H: small bottom-right -->
+      <ellipse cx="620" cy="340" rx="34" ry="30" fill="url(#blob3)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -3,-6; 5,-10; -4,-4; 0,0"
+          dur="16s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="34;30;38;32;34" dur="16s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="30;35;26;33;30" dur="16s" repeatCount="indefinite"/>
+      </ellipse>
+
+    </g><!-- end tile1 filter group -->
+
+    <!-- === TILE 2 (y offset = 400, below viewport — scrolls up into view) === -->
+    <g filter="url(#lava)" transform="translate(0,400)">
+
+      <ellipse cx="100" cy="200" rx="70" ry="60" fill="url(#blob1)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 5,-8; -3,5; 8,-10; 0,0"
+          dur="18s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="70;62;78;65;70" dur="18s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="60;68;54;65;60" dur="18s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <ellipse cx="280" cy="300" rx="50" ry="45" fill="url(#blob2)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -6,-10; 4,-5; -3,-12; 0,0"
+          dur="15s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="50;58;44;54;50" dur="15s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="45;40;52;43;45" dur="15s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <ellipse cx="180" cy="130" rx="38" ry="42" fill="url(#blob3)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 6,8; -3,12; 5,6; 0,0"
+          dur="20s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="38;44;34;42;38" dur="20s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="42;36;48;40;42" dur="20s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <ellipse cx="150" cy="250" rx="55" ry="48" fill="url(#blob4)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -5,-8; 3,-14; -7,-4; 0,0"
+          dur="22s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="55;48;62;52;55" dur="22s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="48;55;42;50;48" dur="22s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <ellipse cx="230" cy="370" rx="90" ry="35" fill="url(#blob1)">
+        <animate attributeName="rx" values="90;82;96;86;90" dur="14s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="35;40;30;38;35" dur="14s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <ellipse cx="420" cy="80" rx="45" ry="40" fill="url(#blob5)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -4,10; 6,5; -3,12; 0,0"
+          dur="17s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="45;40;50;42;45" dur="17s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="40;46;35;43;40" dur="17s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <ellipse cx="500" cy="260" rx="60" ry="52" fill="url(#blob2)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; 5,-6; -4,8; 7,-10; 0,0"
+          dur="19s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="60;54;66;58;60" dur="19s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="52;58;46;55;52" dur="19s" repeatCount="indefinite"/>
+      </ellipse>
+
+      <ellipse cx="620" cy="340" rx="34" ry="30" fill="url(#blob3)">
+        <animateTransform attributeName="transform" type="translate"
+          values="0,0; -3,-6; 5,-10; -4,-4; 0,0"
+          dur="16s" repeatCount="indefinite" calcMode="spline"
+          keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1"/>
+        <animate attributeName="rx" values="34;30;38;32;34" dur="16s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="30;35;26;33;30" dur="16s" repeatCount="indefinite"/>
+      </ellipse>
+
+    </g><!-- end tile2 filter group -->
+
+    <!-- Vertical scroll animation: slide the whole strip up by 400px (one tile height) then reset -->
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="0,0; 0,-400"
+      dur="12s"
+      repeatCount="indefinite"
+      calcMode="linear"/>
+
+  </g><!-- end lamp-strip -->
+
+</svg>
