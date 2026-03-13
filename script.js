@@ -144,19 +144,19 @@ function getCurveFn(name, strength) {
     case 'earlyBias':  return t => Math.pow(t, 1 + strength);           // power > 1 favors low
     case 'lateBias':   return t => 1 - Math.pow(1 - t, 1 + strength);  // favors high
     case 'centerBias': {
-      // Blend between uniform (t) and cosine-center at strength
-      return t => {
-        const center = 0.5 - 0.5 * Math.cos(Math.PI * t);
-        return t + strength * (center - t);
-      };
-    }
-    case 'edgeBias': {
       // Blend between uniform (t) and edge-favoring at strength
       return t => {
         const edge = t < 0.5
           ? 0.5 - 0.5 * Math.pow(1 - 2 * t, 1 + strength)
           : 0.5 + 0.5 * Math.pow(2 * t - 1, 1 + strength);
-        return edge;
+        return t + strength * (edge - t);
+      };
+    }
+    case 'edgeBias': {
+      // Blend between uniform (t) and cosine-center at strength
+      return t => {
+        const center = 0.5 - 0.5 * Math.cos(Math.PI * t);
+        return t + strength * (center - t);
       };
     }
     default: return t => t;
