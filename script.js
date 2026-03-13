@@ -669,11 +669,55 @@ drawCurve();
   const panelEl = document.createElementNS(SVG_NS, 'rect');
   container.appendChild(panelEl);
   panelEl.setAttribute('fill', 'url(#panelBg)');
-  panelEl.setAttribute('rx', 24);
-  panelEl.setAttribute('ry', 24);
-  const panelBaseW = 420, panelBaseH = 260;
-  const panelBaseX = (W - panelBaseW) / 2, panelBaseY = (H - panelBaseH) / 2 - 10;
+  const panelHost = document.querySelector('.container');
+  const lavaSvg = container.ownerSVGElement;
+  const showPanelDebug = false;
+  let panelDebugEl = null;
+  if (showPanelDebug && lavaSvg) {
+    panelDebugEl = document.createElementNS(SVG_NS, 'rect');
+    panelDebugEl.setAttribute('fill', 'none');
+    panelDebugEl.setAttribute('stroke', '#2f6fff');
+    panelDebugEl.setAttribute('stroke-width', '2');
+    panelDebugEl.setAttribute('stroke-opacity', '0.95');
+    panelDebugEl.setAttribute('vector-effect', 'non-scaling-stroke');
+    panelDebugEl.setAttribute('pointer-events', 'none');
+    lavaSvg.appendChild(panelDebugEl);
+  }
+  const panelInsetPx = 6;
+  const panelState = {
+    x: W * 0.2,
+    y: H * 0.15,
+    w: W * 0.6,
+    h: H * 0.7
+  };
   let panelPhaseW = 0, panelPhaseH = 0, panelPhaseX = 0, panelPhaseY = 0;
+
+  function screenToSvg(x, y) {
+    if (!lavaSvg) return { x: (x / window.innerWidth) * W, y: (y / window.innerHeight) * H };
+    const ctm = lavaSvg.getScreenCTM();
+    if (!ctm) return { x: (x / window.innerWidth) * W, y: (y / window.innerHeight) * H };
+    const pt = lavaSvg.createSVGPoint();
+    pt.x = x;
+    pt.y = y;
+    const mapped = pt.matrixTransform(ctm.inverse());
+    return { x: mapped.x, y: mapped.y };
+  }
+
+  function getPanelTargetRect() {
+    if (!panelHost) {
+      return { x: panelState.x, y: panelState.y, w: panelState.w, h: panelState.h, rx: 24, ry: 24 };
+    }
+    const rect = panelHost.getBoundingClientRect();
+    const tl = screenToSvg(rect.left + panelInsetPx, rect.top + panelInsetPx);
+    const br = screenToSvg(rect.right - panelInsetPx, rect.bottom - panelInsetPx);
+    const w = Math.max(40, br.x - tl.x);
+    const h = Math.max(40, br.y - tl.y);
+    const computed = getComputedStyle(panelHost);
+    const radiusPx = parseFloat(computed.borderTopLeftRadius) || 24;
+    const rx = Math.max(6, (radiusPx / Math.max(1, rect.width)) * w);
+    const ry = Math.max(6, (radiusPx / Math.max(1, rect.height)) * h);
+    return { x: tl.x, y: tl.y, w, h, rx, ry };
+  }
 
   function randomBlobProps(spawnAtRandom) {
     const rx = rand(14, 34);
@@ -755,19 +799,36 @@ drawCurve();
 
     const speedMul = riseSpeed / FULL_RISE_SPEED; // 0..1
 
-    // Morph panel rect
+    // Track panel geometry and morph rounded rect around it
+    const targetPanel = getPanelTargetRect();
+    if (panelDebugEl) {
+      panelDebugEl.setAttribute('x', targetPanel.x);
+      panelDebugEl.setAttribute('y', targetPanel.y);
+      panelDebugEl.setAttribute('width', targetPanel.w);
+      panelDebugEl.setAttribute('height', targetPanel.h);
+      panelDebugEl.setAttribute('rx', targetPanel.rx);
+      panelDebugEl.setAttribute('ry', targetPanel.ry);
+    }
+    const lerp = Math.min(1, dt * 10);
+    panelState.x += (targetPanel.x - panelState.x) * lerp;
+    panelState.y += (targetPanel.y - panelState.y) * lerp;
+    panelState.w += (targetPanel.w - panelState.w) * lerp;
+    panelState.h += (targetPanel.h - panelState.h) * lerp;
+
     panelPhaseW += 0.13 * dt;
     panelPhaseH += 0.09 * dt;
     panelPhaseX += 0.07 * dt;
     panelPhaseY += 0.05 * dt;
-    const pw = panelBaseW + Math.sin(panelPhaseW) * 12;
-    const ph = panelBaseH + Math.sin(panelPhaseH) * 10;
-    const px = panelBaseX - (pw - panelBaseW) / 2 + Math.sin(panelPhaseX) * 6;
-    const py = panelBaseY - (ph - panelBaseH) / 2 + Math.sin(panelPhaseY) * 4;
+    const pw = panelState.w + Math.sin(panelPhaseW) * Math.min(12, panelState.w * 0.03);
+    const ph = panelState.h + Math.sin(panelPhaseH) * Math.min(10, panelState.h * 0.03);
+    const px = panelState.x - (pw - panelState.w) / 2 + Math.sin(panelPhaseX) * 4;
+    const py = panelState.y - (ph - panelState.h) / 2 + Math.sin(panelPhaseY) * 3;
     panelEl.setAttribute('x', px);
     panelEl.setAttribute('y', py);
     panelEl.setAttribute('width', pw);
     panelEl.setAttribute('height', ph);
+    panelEl.setAttribute('rx', targetPanel.rx);
+    panelEl.setAttribute('ry', targetPanel.ry);
 
     for (let i = 0; i < activeCount && i < blobs.length; i++) {
       const b = blobs[i];
