@@ -521,37 +521,3 @@ button:active {
   white-space: nowrap;
 }
 
-/* --- Semi-hidden performance panel --- */
-.perf-section {
-  margin-top: 24px;
-  padding-left: 16px;
-  border-left: 2px solid #0f3460;
-  opacity: 0.82;
-  transition: opacity 0.3s;
-}
-
-.perf-section:hover,
-.perf-section[open] {
-  opacity: 1;
-}
-
-.perf-section summary {
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: #b8c2e6;
-  padding: 6px 0;
-  user-select: none;
-  outline: none;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.perf-section summary:hover {
-  color: #d7ddf8;
-}
-
-.perf-section[open] summary {
-  margin-bottom: 12px;
-  color: #d7ddf8;
-}
