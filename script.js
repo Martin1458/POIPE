@@ -642,148 +642,40 @@ preloadDefault();
 
 drawCurve();
 
-// === Lava Blob System — fully JS-driven, infinite with respawn ===
-(function initLavaBlobs() {
-  const SVG_NS = 'http://www.w3.org/2000/svg';
-  const container = document.getElementById('lava-blobs');
-  if (!container) return;
+// === Tilted line background ===
+(function initLines() {
+  const canvas = document.getElementById('lava-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
 
-  const W = 800, H = 400;
-  const fills = ['url(#blob1)', 'url(#blob2)', 'url(#blob3)', 'url(#blob4)', 'url(#blob5)'];
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-  function rand(a, b) { return a + Math.random() * (b - a); }
-  function randInt(a, b) { return Math.floor(rand(a, b + 1)); }
-
-  // Each blob is a JS object with its own state
-  // { el, cx, cy, rx, ry, vx, vy, rxBase, ryBase, morphPhaseX, morphPhaseY, morphSpeedX, morphSpeedY, morphAmpX, morphAmpY, driftPhase, driftSpeed, driftAmp }
-  const blobs = [];
-  let activeCount = 50; // controlled by slider
-  const FULL_RISE_SPEED = 15; // SVG units/sec at full speed
+  const ANGLE = 20 * Math.PI / 180;
+  const SPACING = 52;
+  const SCROLL_SPEED_IDLE = 6;
+  const SCROLL_SPEED_ACTIVE = 60;
   const EASE_DUR = 2.0;
-  let riseSpeed = 0;
 
-  // lavaScrollTarget: 0 = stopped, 1 = full speed
+  const lineStyles = [
+    { color: 'rgba(255, 100, 20, 0.5)',  width: 6  },
+    { color: 'rgba(255, 200, 0, 0.35)',  width: 4  },
+    { color: 'rgba(220, 40, 10, 0.45)',  width: 8  },
+    { color: 'rgba(255, 70, 130, 0.35)', width: 4  },
+    { color: 'rgba(255, 150, 0, 0.5)',   width: 6  },
+  ];
+
+  const lineDir = [Math.cos(ANGLE), Math.sin(ANGLE)];
+  const normal  = [-Math.sin(ANGLE), Math.cos(ANGLE)];
+
+  let totalOffset = 0;
+  let scrollSpeed = SCROLL_SPEED_IDLE;
   window.lavaScrollTarget = 0;
 
-  // --- Panel background blob (rounded rect that morphs with goo filter) ---
-  const panelEl = document.createElementNS(SVG_NS, 'rect');
-  container.appendChild(panelEl);
-  panelEl.setAttribute('fill', 'url(#panelBg)');
-  const panelHost = document.querySelector('.container');
-  const lavaSvg = container.ownerSVGElement;
-  const showPanelDebug = false;
-  let panelDebugEl = null;
-  if (showPanelDebug && lavaSvg) {
-    panelDebugEl = document.createElementNS(SVG_NS, 'rect');
-    panelDebugEl.setAttribute('fill', 'none');
-    panelDebugEl.setAttribute('stroke', '#2f6fff');
-    panelDebugEl.setAttribute('stroke-width', '2');
-    panelDebugEl.setAttribute('stroke-opacity', '0.95');
-    panelDebugEl.setAttribute('vector-effect', 'non-scaling-stroke');
-    panelDebugEl.setAttribute('pointer-events', 'none');
-    lavaSvg.appendChild(panelDebugEl);
-  }
-  const panelInsetPx = 6;
-  const panelState = {
-    x: W * 0.2,
-    y: H * 0.15,
-    w: W * 0.6,
-    h: H * 0.7
-  };
-  let panelPhaseW = 0, panelPhaseH = 0, panelPhaseX = 0, panelPhaseY = 0;
-
-  function screenToSvg(x, y) {
-    if (!lavaSvg) return { x: (x / window.innerWidth) * W, y: (y / window.innerHeight) * H };
-    const ctm = lavaSvg.getScreenCTM();
-    if (!ctm) return { x: (x / window.innerWidth) * W, y: (y / window.innerHeight) * H };
-    const pt = lavaSvg.createSVGPoint();
-    pt.x = x;
-    pt.y = y;
-    const mapped = pt.matrixTransform(ctm.inverse());
-    return { x: mapped.x, y: mapped.y };
-  }
-
-  function getPanelTargetRect() {
-    if (!panelHost) {
-      return { x: panelState.x, y: panelState.y, w: panelState.w, h: panelState.h, rx: 24, ry: 24 };
-    }
-    const rect = panelHost.getBoundingClientRect();
-    const tl = screenToSvg(rect.left + panelInsetPx, rect.top + panelInsetPx);
-    const br = screenToSvg(rect.right - panelInsetPx, rect.bottom - panelInsetPx);
-    const w = Math.max(40, br.x - tl.x);
-    const h = Math.max(40, br.y - tl.y);
-    const computed = getComputedStyle(panelHost);
-    const radiusPx = parseFloat(computed.borderTopLeftRadius) || 24;
-    const rx = Math.max(6, (radiusPx / Math.max(1, rect.width)) * w);
-    const ry = Math.max(6, (radiusPx / Math.max(1, rect.height)) * h);
-    return { x: tl.x, y: tl.y, w, h, rx, ry };
-  }
-
-  function randomBlobProps(spawnAtRandom) {
-    const rx = rand(14, 34);
-    const ry = rand(12, 30);
-    return {
-      cx: rand(30, W - 30),
-      cy: spawnAtRandom ? rand(0, H) : H + rand(20, 80), // spawn below viewport or randomly
-      rx: rx,
-      ry: ry,
-      rxBase: rx,
-      ryBase: ry,
-      vx: rand(-2, 2),      // slow horizontal drift base
-      vy: rand(8, 22),       // individual rise speed
-      morphPhaseX: rand(0, Math.PI * 2),
-      morphPhaseY: rand(0, Math.PI * 2),
-      morphSpeedX: rand(0.15, 0.4),
-      morphSpeedY: rand(0.15, 0.4),
-      morphAmpX: rand(3, 7),
-      morphAmpY: rand(3, 7),
-      driftPhase: rand(0, Math.PI * 2),
-      driftSpeed: rand(0.1, 0.3),
-      driftAmp: rand(12, 28),
-      fill: fills[randInt(0, 4)]
-    };
-  }
-
-  function createBlobEl() {
-    const el = document.createElementNS(SVG_NS, 'ellipse');
-    container.appendChild(el);
-    return el;
-  }
-
-  function respawnBlob(b, spawnAtRandom) {
-    const props = randomBlobProps(spawnAtRandom);
-    Object.assign(b, props);
-    b.el.setAttribute('fill', props.fill);
-  }
-
-  // Create initial blobs distributed across viewport
-  function initBlobs(count) {
-    for (let i = 0; i < count; i++) {
-      const el = createBlobEl();
-      const props = randomBlobProps(true); // random position
-      const blob = { el, ...props };
-      blobs.push(blob);
-      el.setAttribute('fill', props.fill);
-    }
-  }
-
-  function ensureBlobCount(count) {
-    // Add more blobs if needed
-    while (blobs.length < count) {
-      const el = createBlobEl();
-      const props = randomBlobProps(true);
-      const blob = { el, ...props };
-      blobs.push(blob);
-      el.setAttribute('fill', props.fill);
-    }
-    // Show/hide
-    activeCount = count;
-    blobs.forEach((b, i) => {
-      b.el.style.display = i < count ? '' : 'none';
-    });
-  }
-
-  // Animation loop
   let lastTime = null;
 
   function tick(now) {
@@ -791,98 +683,43 @@ drawCurve();
     const dt = (now - lastTime) / 1000;
     lastTime = now;
 
-    // Ease rise speed toward target
-    const target = window.lavaScrollTarget * FULL_RISE_SPEED;
-    const ramp = FULL_RISE_SPEED / EASE_DUR * dt;
-    if (riseSpeed < target) riseSpeed = Math.min(riseSpeed + ramp, target);
-    else if (riseSpeed > target) riseSpeed = Math.max(riseSpeed - ramp, target);
+    const target = window.lavaScrollTarget ? SCROLL_SPEED_ACTIVE : SCROLL_SPEED_IDLE;
+    const ramp = (SCROLL_SPEED_ACTIVE - SCROLL_SPEED_IDLE) / EASE_DUR * dt;
+    if (scrollSpeed < target) scrollSpeed = Math.min(scrollSpeed + ramp, target);
+    else if (scrollSpeed > target) scrollSpeed = Math.max(scrollSpeed - ramp, target);
+    totalOffset += scrollSpeed * dt;
+    const scrollOffset = totalOffset % SPACING;
+    const scrollSteps = Math.floor(totalOffset / SPACING);
 
-    const speedMul = riseSpeed / FULL_RISE_SPEED; // 0..1
+    const w = canvas.width;
+    const h = canvas.height;
+    const diag = Math.sqrt(w * w + h * h);
+    const cx = w / 2, cy = h / 2;
+    const halfCount = Math.ceil(diag / SPACING) + 2;
 
-    // Track panel geometry and morph rounded rect around it
-    const targetPanel = getPanelTargetRect();
-    if (panelDebugEl) {
-      panelDebugEl.setAttribute('x', targetPanel.x);
-      panelDebugEl.setAttribute('y', targetPanel.y);
-      panelDebugEl.setAttribute('width', targetPanel.w);
-      panelDebugEl.setAttribute('height', targetPanel.h);
-      panelDebugEl.setAttribute('rx', targetPanel.rx);
-      panelDebugEl.setAttribute('ry', targetPanel.ry);
-    }
-    const lerp = Math.min(1, dt * 10);
-    panelState.x += (targetPanel.x - panelState.x) * lerp;
-    panelState.y += (targetPanel.y - panelState.y) * lerp;
-    panelState.w += (targetPanel.w - panelState.w) * lerp;
-    panelState.h += (targetPanel.h - panelState.h) * lerp;
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, '#0a0010');
+    bgGrad.addColorStop(1, '#1a0030');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
 
-    panelPhaseW += 0.13 * dt;
-    panelPhaseH += 0.09 * dt;
-    panelPhaseX += 0.07 * dt;
-    panelPhaseY += 0.05 * dt;
-    const pw = panelState.w + Math.sin(panelPhaseW) * Math.min(12, panelState.w * 0.03);
-    const ph = panelState.h + Math.sin(panelPhaseH) * Math.min(10, panelState.h * 0.03);
-    const px = panelState.x - (pw - panelState.w) / 2 + Math.sin(panelPhaseX) * 4;
-    const py = panelState.y - (ph - panelState.h) / 2 + Math.sin(panelPhaseY) * 3;
-    panelEl.setAttribute('x', px);
-    panelEl.setAttribute('y', py);
-    panelEl.setAttribute('width', pw);
-    panelEl.setAttribute('height', ph);
-    panelEl.setAttribute('rx', targetPanel.rx);
-    panelEl.setAttribute('ry', targetPanel.ry);
+    for (let i = -halfCount; i <= halfCount; i++) {
+      const d = i * SPACING + scrollOffset;
+      const px = cx + d * normal[0];
+      const py = cy + d * normal[1];
+      const ci = i - scrollSteps;
+      const style = lineStyles[((ci % lineStyles.length) + lineStyles.length) % lineStyles.length];
 
-    for (let i = 0; i < activeCount && i < blobs.length; i++) {
-      const b = blobs[i];
-
-      // Rise upward (individual speed scaled by global speed multiplier)
-      b.cy -= b.vy * speedMul * dt;
-
-      // Horizontal sine drift
-      b.driftPhase += b.driftSpeed * dt;
-      const driftX = Math.sin(b.driftPhase) * b.driftAmp;
-
-      // Morph rx/ry
-      b.morphPhaseX += b.morphSpeedX * dt;
-      b.morphPhaseY += b.morphSpeedY * dt;
-      const curRx = b.rxBase + Math.sin(b.morphPhaseX) * b.morphAmpX;
-      const curRy = b.ryBase + Math.sin(b.morphPhaseY) * b.morphAmpY;
-
-      // Respawn if off top (with margin for blur)
-      if (b.cy < -curRy - 30) {
-        respawnBlob(b, false); // respawn at bottom
-      }
-
-      // Respawn if off bottom (after session stops and speed is 0, blob drifted off)
-      if (b.cy > H + curRy + 80) {
-        b.cy = H + rand(20, 60); // keep near bottom, ready for next start
-      }
-
-      // Update SVG element
-      const displayCx = b.cx + driftX;
-      b.el.setAttribute('cx', displayCx);
-      b.el.setAttribute('cy', b.cy);
-      b.el.setAttribute('rx', Math.max(5, curRx));
-      b.el.setAttribute('ry', Math.max(5, curRy));
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = style.width;
+      ctx.beginPath();
+      ctx.moveTo(px - diag * lineDir[0], py - diag * lineDir[1]);
+      ctx.lineTo(px + diag * lineDir[0], py + diag * lineDir[1]);
+      ctx.stroke();
     }
 
     requestAnimationFrame(tick);
   }
 
-  initBlobs(50);
   requestAnimationFrame(tick);
-
-  // --- Blob count slider ---
-  const slider = document.getElementById('blobCountSlider');
-  const input = document.getElementById('blobCountInput');
-  if (slider && input) {
-    slider.addEventListener('input', () => {
-      input.value = slider.value;
-      ensureBlobCount(Number(slider.value));
-    });
-    input.addEventListener('input', () => {
-      let val = Math.max(0, Math.min(200, Number(input.value)));
-      input.value = val;
-      slider.value = val;
-      ensureBlobCount(val);
-    });
-  }
 })();
