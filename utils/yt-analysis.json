@@ -1,0 +1,210 @@
+{
+  "audio": "YT.mp3",
+  "sha256": "1037e10424da483ebdebb7ca21a4ade603d84b6e814c1e98c6cac37c8a0a68ff",
+  "duration_seconds": 3603.609271,
+  "reference": "POIPE.wav",
+  "settings": {
+    "sample_rate": 24000,
+    "threshold_db": -40,
+    "silence_seconds": 0.3,
+    "min_gain": 0.5,
+    "min_correlation": 0.2,
+    "speed_min": 0.75,
+    "speed_max": 1.25
+  },
+  "template": {
+    "start_seconds": 1.2258330000000002,
+    "end_seconds": 4.356812000000001
+  },
+  "reference_comparison": {
+    "speed_percent": 100.0,
+    "correlation": 0.7625,
+    "rms_gain_percent": 102.1
+  },
+  "regions": [
+    {
+      "start_seconds": 1.375833,
+      "end_seconds": 4.206812,
+      "matched_events": 1,
+      "residual_energy_fraction": 0.0004
+    },
+    {
+      "start_seconds": 764.239896,
+      "end_seconds": 767.077021,
+      "matched_events": 1,
+      "residual_energy_fraction": 0.0602
+    },
+    {
+      "start_seconds": 945.838208,
+      "end_seconds": 948.675104,
+      "matched_events": 1,
+      "residual_energy_fraction": 0.0796
+    },
+    {
+      "start_seconds": 1888.279687,
+      "end_seconds": 1898.485292,
+      "matched_events": 3,
+      "residual_energy_fraction": 0.4481
+    },
+    {
+      "start_seconds": 1960.769354,
+      "end_seconds": 1963.605708,
+      "matched_events": 1,
+      "residual_energy_fraction": 0.06
+    },
+    {
+      "start_seconds": 2903.919687,
+      "end_seconds": 2906.749937,
+      "matched_events": 1,
+      "residual_energy_fraction": 0.0603
+    },
+    {
+      "start_seconds": 3281.254437,
+      "end_seconds": 3290.298333,
+      "matched_events": 8,
+      "residual_energy_fraction": 0.3168
+    },
+    {
+      "start_seconds": 3603.201812,
+      "end_seconds": 3603.609271,
+      "matched_events": 1,
+      "residual_energy_fraction": 0.0907
+    }
+  ],
+  "events": [
+    {
+      "onset_seconds": 1.375833,
+      "relative_gain": 1.0,
+      "correlation": 0.9998,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 764.239729,
+      "relative_gain": 0.97,
+      "correlation": 0.9694,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 945.837833,
+      "relative_gain": 0.9595,
+      "correlation": 0.9594,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 1888.279312,
+      "relative_gain": 0.961,
+      "correlation": 0.7748,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 1890.031062,
+      "relative_gain": 0.9637,
+      "correlation": 0.7461,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 1892.283312,
+      "relative_gain": 0.9523,
+      "correlation": 0.6469,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 1960.768396,
+      "relative_gain": 0.9688,
+      "correlation": 0.9695,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 2903.918937,
+      "relative_gain": 0.9679,
+      "correlation": 0.9694,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3281.254229,
+      "relative_gain": 0.9699,
+      "correlation": 0.8605,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3283.631604,
+      "relative_gain": 0.9718,
+      "correlation": 0.8269,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3285.842145,
+      "relative_gain": 1.0098,
+      "correlation": 0.3714,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3286.634604,
+      "relative_gain": 1.0114,
+      "correlation": 0.3513,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3286.96827,
+      "relative_gain": 0.9787,
+      "correlation": 0.3437,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3287.176812,
+      "relative_gain": 0.9462,
+      "correlation": 0.3375,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3287.301937,
+      "relative_gain": 0.9745,
+      "correlation": 0.351,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3287.343645,
+      "relative_gain": 0.7562,
+      "correlation": 0.2733,
+      "truncated": false
+    },
+    {
+      "onset_seconds": 3603.200854,
+      "relative_gain": 0.927,
+      "correlation": 0.9536,
+      "truncated": true
+    }
+  ],
+  "intervals_seconds": [
+    762.863896,
+    181.598104,
+    942.441479,
+    1.75175,
+    2.25225,
+    68.485084,
+    943.150541,
+    377.335292,
+    2.377375,
+    2.210541,
+    0.792459,
+    0.333666,
+    0.208542,
+    0.125125,
+    0.041708,
+    315.857209
+  ],
+  "interval_summary_seconds": {
+    "min": 0.041708,
+    "median": 2.314813,
+    "mean": 225.114064,
+    "max": 943.150541
+  },
+  "notes": [
+    "Onsets use the audible start of the isolated example, not the beginning of POIPE.wav.",
+    "Intervals are onset-to-onset, matching the website scheduler; leading/trailing silence is excluded.",
+    "Template matching finds overlapping copies but can miss altered or heavily masked sounds.",
+    "High residual energy flags material not explained by the matched copies; event count is an estimate.",
+    "RMS gain compares mono decoded signals; compression and waveform differences limit loudness accuracy.",
+    "Relative gains below one can reflect sub-sample alignment and MP3 encoding, not intentional volume variation."
+  ]
+}

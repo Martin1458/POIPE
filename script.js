@@ -140,6 +140,11 @@ const ctx = curveCanvas.getContext('2d');
 // strength: 1.0 = default, <1 = flatter (closer to uniform), >1 = more extreme
 function getCurveFn(name, strength) {
   switch (name) {
+    case 'ytVideo': {
+      const intervals = ytVideoPreset.intervalsSeconds;
+      return t => intervals[Math.min(intervals.length - 1, Math.floor(t * intervals.length))]
+        / ytVideoPreset.intervalScaleSeconds;
+    }
     case 'uniform':    return t => t;
     case 'earlyBias':  return t => Math.pow(t, 1 + strength);           // power > 1 favors low
     case 'lateBias':   return t => 1 - Math.pow(1 - t, 1 + strength);  // favors high
@@ -190,6 +195,14 @@ function drawCurve() {
   let maxPdf = 0;
   const eps = 0.001;
   for (let i = 0; i <= steps; i++) {
+    if (curveName === 'ytVideo') {
+      // Discrete measured gaps have probability masses, not a smooth PDF.
+      const count = ytVideoPreset.intervalsSeconds.filter(seconds =>
+        Math.round(seconds / ytVideoPreset.intervalScaleSeconds * steps) === i).length;
+      pdf.push(count);
+      maxPdf = Math.max(maxPdf, count);
+      continue;
+    }
     const t = i / steps;
     // Derivative of CDF = PDF of output distribution
     // For output value t, density = 1 / (derivative of curveFn at inverse point)
@@ -272,7 +285,7 @@ strengthInput.addEventListener('input', () => {
 });
 
 function updateStrengthVisibility() {
-  const hidden = curveSelect.value === 'uniform';
+  const hidden = curveSelect.value === 'uniform' || curveSelect.value === 'ytVideo';
   strengthRow.style.display = hidden ? 'none' : '';
   strengthInfo.style.display = hidden ? 'none' : '';
 }
@@ -494,6 +507,7 @@ const builtInPresets = {
   normal: { volume: 50, minInterval: 0, maxInterval: 420, duration: 60, overlap: 3, speed: 100, volVar: 0, pitchVar: 0 },
   frequent: { volume: 60, minInterval: 0, maxInterval: 60, duration: 60, overlap: 3, speed: 100, volVar: 15, pitchVar: 10 },
   chaos: { volume: 250, minInterval: 0, maxInterval: 5, duration: 10, overlap: 10, speed: 100, volVar: 100, pitchVar: 70 },
+  ytVideo: ytVideoPreset.settings,
 };
 
 function getAllSettings() {
@@ -531,7 +545,7 @@ function applySettings(s) {
 document.querySelectorAll('.btn-preset[data-preset]').forEach(btn => {
   btn.addEventListener('click', () => {
     const key = btn.dataset.preset;
-    if (builtInPresets[key]) applySettings(builtInPresets[key]);
+    if (builtInPresets[key]) applySettings({ curve: 'uniform', strength: 100, ...builtInPresets[key] });
   });
 });
 

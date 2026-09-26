@@ -88,7 +88,7 @@
         <div class="control-group">
           <label>Max Interval</label>
           <div class="slider-row">
-            <input type="range" id="maxIntervalSlider" min="0" max="900" value="420">
+            <input type="range" id="maxIntervalSlider" min="0" max="1200" value="420">
             <input type="number" id="maxIntervalInput" min="0" value="420">
             <span class="unit">sec</span>
           </div>
@@ -105,6 +105,7 @@
         <button class="btn-preset" data-preset="normal">Normal</button>
         <button class="btn-preset" data-preset="frequent">Frequent</button>
         <button class="btn-preset" data-preset="chaos">Chaos</button>
+        <button class="btn-preset" data-preset="ytVideo">that YT video</button>
       </div>
       <div id="customPresetsSection">
         <div class="preset-custom-row">
@@ -167,6 +168,7 @@
           <option value="lateBias">Late Bias (later more likely)</option>
           <option value="centerBias">Center Bias (middle more likely)</option>
           <option value="edgeBias">Edge Bias (extremes more likely)</option>
+          <option value="ytVideo">YouTube timing (measured gaps)</option>
         </select>
         <div class="slider-row" id="strengthRow">
           <label style="min-width: 60px; margin: 0;">Strength</label>
@@ -186,6 +188,7 @@
 </div><!-- end controlsPanel -->
   </div>
 
+  <script src="yt-preset.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
